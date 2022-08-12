@@ -47,17 +47,15 @@ schema = graphene.Schema(query=Query, mutation=Mutation)
 
 result = schema.execute(
     """
-    mutation ($username: String){
-        createUser(username: $username) {
-            user {
-                id
-                username
-                createdAt
+    query getUsersQuery ($limit: Int){
+        users (limit: $limit){
+            id
+            username
+            createdAt
             }
-        }
     }
     """,
-    variable_values={'username': 'Dave'}
+    variable_values={'limit': 1}
 )
 
 print(result)
