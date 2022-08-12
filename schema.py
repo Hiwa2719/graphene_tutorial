@@ -4,6 +4,11 @@ import uuid
 import graphene
 
 
+class Post(graphene.ObjectType):
+    title = graphene.String()
+    content = graphene.String()
+
+
 class User(graphene.ObjectType):
     id = graphene.ID(default_value=str(uuid.uuid4()))
     username = graphene.String()
@@ -39,23 +44,40 @@ class CreateUser(graphene.Mutation):
         return CreateUser(user=user)
 
 
+class CreatePost(graphene.Mutation):
+    post = graphene.Field(Post)
+
+    class Arguments:
+        title = graphene.String()
+        content = graphene.String()
+
+    def mutate(self, info, title, content):
+        if info.context.get('is_anonymous'):
+            raise Exception('Not Authenticated User')
+        post = Post(title=title, content=content)
+        return CreatePost(post=post)
+
+
 class Mutation(graphene.ObjectType):
     create_user = CreateUser.Field()
+    create_post = CreatePost.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
 
 result = schema.execute(
     """
-    query getUsersQuery ($limit: Int){
-        users (limit: $limit){
-            id
-            username
-            createdAt
+    mutation {
+        createPost(title: "hello there", content: "i have come to visit you"){
+        post {
+            title
+            content
             }
+        }
     }
     """,
-    variable_values={'limit': 1}
+    context={'is_anonymous': True}
+    # variable_values={'limit': 1}
 )
 
 print(result)
