@@ -1,13 +1,13 @@
 import json
 from datetime import datetime
-
+import uuid
 import graphene
 
 
 class User(graphene.ObjectType):
-    id = graphene.ID()
+    id = graphene.ID(default_value=str(uuid.uuid4()))
     username = graphene.String()
-    created_at = graphene.DateTime()
+    created_at = graphene.DateTime(default_value=datetime.now())
 
 
 class Query(graphene.ObjectType):
@@ -35,7 +35,7 @@ class CreateUser(graphene.Mutation):
         username = graphene.String()
 
     def mutate(self, info, username):
-        user = User(id="3", username=username, created_at=datetime.now())
+        user = User(username=username)
         return CreateUser(user=user)
 
 
